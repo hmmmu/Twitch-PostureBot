@@ -1,5 +1,6 @@
 ﻿using TwitchLib;
 using TwitchLib.Client;
+using TwitchLib.Api;
 using TwitchLib.Client.Enums;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Extensions;
@@ -15,114 +16,166 @@ namespace hmmubot
         readonly ConnectionCredentials credentials = new ConnectionCredentials(info.BotUsername, info.BotToken);
         TwitchClient client;
         Stopwatch stopwatch;
+        Stopwatch timeAlive;
+        TwitchAPI api;
+        bool enabled;
+        string cChannel;
+        bool isAlive;
+        string channelid;
+        int interval; //in mins
 
         public TwitchChatBot()
         {
             
         }
         //hmmus bot
+        private bool IsStreaming(string id)
+        {
+            
+            return api.Streams.v5.BroadcasterOnlineAsync(id).Result;
+        }
+
         internal void Connecthmmu()
         {
+            //inits api
+            api = new TwitchAPI();
+            api.Settings.ClientId = info.ClientId;
+            api.Settings.AccessToken = info.BotToken;
+            TwitchLib.Api.Models.v5.Users.User[] users = api.Users.v5.GetUserByNameAsync(info.Channelhmmmu).Result.Matches;
+            channelid = users[0].Id;
+
+            interval = 10;
+            enabled = false;
             stopwatch = new Stopwatch();
             Console.WriteLine("connected to hmmus chat, starting stopwatch");
             stopwatch.Start();
+            timeAlive = new Stopwatch();
+            timeAlive.Start();
             client = new TwitchClient();
+            this.cChannel = info.Channelhmmmu;
             client.Initialize(credentials, info.Channelhmmmu);
-            client.OnMessageReceived += Client_OnMessageReceivedhmmu;
+            client.OnMessageReceived += Client_OnMessageReceived;
             client.OnConnectionError += Client_OnConnectionError;
             client.OnDisconnected += Client_OnDisconnected;
+            client.OnWhisperReceived += Client_OnWhisperReceived;
             client.Connect();
         }
 
-        private void Client_OnMessageReceivedhmmu(object sender, OnMessageReceivedArgs e)
-        {
-            if (e.ChatMessage.Message.StartsWith("!enation", StringComparison.InvariantCultureIgnoreCase))
-            {
-                client.SendMessage(info.Channelhmmmu, $"/me POSTURE NATION 👌 OMGScoods");
-            }
-
-            else if (stopwatch.Elapsed.Hours >= 2)
-            { 
-            client.SendMessage(info.Channelhmmmu, $"/me : OMGScoods 👆 Friendly reminder to check your posture FeelsOkayMan");
-            stopwatch.Restart();
-            }
-        }
+ 
         //forsens bot
         internal void Connectforsen()
         {
+            api = new TwitchAPI();
+            api.Settings.ClientId = info.ClientId;
+            api.Settings.AccessToken = info.BotToken;
+            TwitchLib.Api.Models.v5.Users.User[] users = api.Users.v5.GetUserByNameAsync(info.Channelforsen).Result.Matches;
+            channelid = users[0].Id;
+
+            interval = 45;
+            enabled = false;
             stopwatch = new Stopwatch();
             Console.WriteLine("connected to forsens chat, starting stopwatch");
             stopwatch.Start();
+            timeAlive = new Stopwatch();
+            timeAlive.Start();
             client = new TwitchClient();
+            this.cChannel = info.Channelforsen;
             client.Initialize(credentials, info.Channelforsen);
-            client.OnMessageReceived += Client_OnMessageReceivedforsen;
+            client.OnMessageReceived += Client_OnMessageReceived;
             client.OnConnectionError += Client_OnConnectionError;
             client.OnDisconnected += Client_OnDisconnected;
             client.Connect();
         }
 
-        private void Client_OnMessageReceivedforsen(object sender, OnMessageReceivedArgs e)
-        {
-            if (e.ChatMessage.Message.StartsWith("!enation", StringComparison.InvariantCultureIgnoreCase))
-            {
-                client.SendMessage(info.Channelforsen, $"/me POSTURE NATION 👌 OMGScoods");
-            }
-
-            else if (stopwatch.Elapsed.Hours >= 2)
-            {
-                client.SendMessage(info.Channelforsen, $"/me : OMGScoods 👆 Friendly reminder to check your posture FeelsOkayMan");
-                stopwatch.Restart();
-            }
-        }
+ 
         //nymns bot
         internal void Connectnymn()
         {
+            api = new TwitchAPI();
+            api.Settings.ClientId = info.ClientId;
+            api.Settings.AccessToken = info.BotToken;
+            TwitchLib.Api.Models.v5.Users.User[] users = api.Users.v5.GetUserByNameAsync(info.Channelnymn).Result.Matches;
+            channelid = users[0].Id;
+
+            interval = 60;
+            enabled = false;
             stopwatch = new Stopwatch();
             Console.WriteLine("connected to nymns chat, starting stopwatch");
             stopwatch.Start();
+            timeAlive = new Stopwatch();
+            timeAlive.Start();
             client = new TwitchClient();
+            this.cChannel = info.Channelnymn;
             client.Initialize(credentials, info.Channelnymn);
-            client.OnMessageReceived += Client_OnMessageReceivednymn;
+            client.OnMessageReceived += Client_OnMessageReceived;
             client.OnConnectionError += Client_OnConnectionError;
             client.OnDisconnected += Client_OnDisconnected;
+
             client.Connect();
         }
 
-        private void Client_OnMessageReceivednymn(object sender, OnMessageReceivedArgs e)
-        {
-            if (stopwatch.Elapsed.Hours >= 2)
-            {
-                client.SendMessage(info.Channelnymn, $"/me : OMGScoods 👆 Friendly reminder to check your posture FeelsOkayMan");
-                stopwatch.Restart();
-            }
-        }
         //pajs bot
         internal void ConnectPajlada()
         {
+            api = new TwitchAPI();
+            api.Settings.ClientId = info.ClientId;
+            api.Settings.AccessToken = info.BotToken;
+            TwitchLib.Api.Models.v5.Users.User[] users = api.Users.v5.GetUserByNameAsync(info.ChannelPajlada).Result.Matches;
+            channelid = users[0].Id;
+
+            interval = 30;
+            enabled = false;
             stopwatch = new Stopwatch();
             Console.WriteLine("connected to pajladas chat, starting stopwatch");
             stopwatch.Start();
+            timeAlive = new Stopwatch();
+            timeAlive.Start();
             client = new TwitchClient();
+            this.cChannel = info.ChannelPajlada;
             client.Initialize(credentials, info.ChannelPajlada);
-            client.OnMessageReceived += Client_OnMessageReceivedPajlada;
+            client.OnMessageReceived += Client_OnMessageReceived;
             client.OnConnectionError += Client_OnConnectionError;
             client.OnDisconnected += Client_OnDisconnected;
+
             client.Connect();
         }
-
-        private void Client_OnMessageReceivedPajlada(object sender, OnMessageReceivedArgs e)
+        private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
-            if (stopwatch.Elapsed.Hours >= 2)
+            if (e.ChatMessage.Message.StartsWith("!status", StringComparison.InvariantCultureIgnoreCase) && ((e.ChatMessage.DisplayName == "hmmmu") || (e.ChatMessage.DisplayName == this.cChannel) || (e.ChatMessage.DisplayName == "pajlada")|| (e.ChatMessage.DisplayName == "noTheOwNeR")))
             {
-                client.SendMessage(info.ChannelPajlada, $"/me : OMGScoods 👆 Friendly reminder to check your posture FeelsOkayMan");
+                if(this.enabled)
+                    client.SendMessage(this.cChannel, $"/me OMGScoods Current uptime " + timeAlive.Elapsed.Minutes + " mins. Last message was " + stopwatch.Elapsed.Minutes + " mins ago."+" Currently enabled.");
+                else
+                    client.SendMessage(this.cChannel, $"/me OMGScoods Current uptime " + timeAlive.Elapsed.Minutes + " mins. Last message was " + stopwatch.Elapsed.Minutes + " mins ago." + " Currently Disabled.");
+            }
+            if (e.ChatMessage.Message.StartsWith("!enable", StringComparison.InvariantCultureIgnoreCase) && ((e.ChatMessage.DisplayName == "hmmmu") || (e.ChatMessage.DisplayName == this.cChannel) || (e.ChatMessage.DisplayName == "pajlada") || (e.ChatMessage.DisplayName == "noTheOwNeR")))
+            {
+                this.enabled = true;
+                client.SendMessage(this.cChannel, $"/me OMGScoods Now enabled in this chat. FeelsGoodMan");
+            }
+            if (e.ChatMessage.Message.StartsWith("!disable", StringComparison.InvariantCultureIgnoreCase) && ((e.ChatMessage.DisplayName == "hmmmu") || (e.ChatMessage.DisplayName == this.cChannel) || (e.ChatMessage.DisplayName == "pajlada") || (e.ChatMessage.DisplayName == "noTheOwNeR")))
+            {
+                this.enabled = false;
+                client.SendMessage(this.cChannel, $"/me OMGScoods Now disabled in this chat. FeelsBadMan");
+            }
+
+            if ((stopwatch.Elapsed.Minutes >= interval) && this.enabled)
+            {
+                if (IsStreaming(channelid))
+                {
+                    client.SendMessage(this.cChannel, $"/me : OMGScoods 👆 Friendly reminder to check your posture FeelsOkayMan");
+                }
                 stopwatch.Restart();
             }
         }
-
-
+        private void Client_OnWhisperReceived(object sender, OnWhisperReceivedArgs e)
+        {
+            client.SendWhisper("hmmmu", $"{e.WhisperMessage.Username} said: {e.WhisperMessage.Message}");
+        }
         private void Client_OnDisconnected(object sender, OnDisconnectedArgs e)
         {
             client.Reconnect();
+            timeAlive.Restart();
         }
         private void Client_OnConnectionError(object sender, OnConnectionErrorArgs e)
         {
@@ -133,6 +186,7 @@ namespace hmmubot
         {
             Console.WriteLine("Disconnecting");
         }
+
     }
 
 }
