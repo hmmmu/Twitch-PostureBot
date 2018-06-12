@@ -13,6 +13,7 @@ namespace hmmubot
             nymnbot.Connectnymn();
             TwitchChatBot pajladabot = new TwitchChatBot();
             pajladabot.ConnectPajlada();
+ 
             Console.ReadLine();
             pajladabot.Disconnect();
             nymnbot.Disconnect();
